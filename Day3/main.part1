@@ -1,0 +1,66 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+)
+
+// each number on the line is a battery.
+// joltage = the number formed by the turned on batteries.
+// Batteries cannot be re-arranged.
+
+func main1() {
+	currentDir, _ := os.Getwd()
+	path := filepath.Join(currentDir, "test-input.txt")
+	dat, _ := os.ReadFile(path)
+	banks := strings.Split(string(dat), "\n")
+	joltages := []int{}
+
+	// create a list of batteries within a bank.
+	// find the two largest batteries but keep the order. combine as string and convert to int.
+	// Add all banks together.
+
+	for i := 0; i < len(banks); i++ {
+		batteries := banks[i]
+
+		battery1 := struct {
+			index int
+			value int
+		}{index: -1, value: 0}
+		battery2 := struct {
+			index int
+			value int
+		}{index: -1, value: 0}
+
+		// Get largest number
+		for j := 0; j < len(batteries)-1; j++ {
+			battery, _ := strconv.Atoi(string(batteries[j]))
+			if battery > battery1.value {
+				battery1.index = j
+				battery1.value = battery
+			}
+		}
+
+		// get second largest number
+		for j := battery1.index; j < len(batteries); j++ {
+			battery, _ := strconv.Atoi(string(batteries[j]))
+			if battery > battery2.value && j != battery1.index {
+				battery2.index = j
+				battery2.value = battery
+			}
+		}
+
+		joltage, _ := strconv.Atoi(strconv.Itoa(battery1.value) + strconv.Itoa(battery2.value))
+		//fmt.Println("joltage:", joltage)
+		joltages = append(joltages, joltage)
+	}
+
+	totalJoltage := 0
+	for i := 0; i < len(joltages); i++ {
+		totalJoltage += joltages[i]
+	}
+	fmt.Println("Total joltage:", totalJoltage)
+}
