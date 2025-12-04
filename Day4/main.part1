@@ -1,0 +1,73 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+// The forklifts can only access a roll of paper if there are fewer than four rolls of paper in the eight adjacent positions.
+// Positions to check
+// CCC
+// C@C
+// CCC
+
+type PaperRoll struct {
+	accessible bool
+	value      byte
+}
+
+func main() {
+	currentDir, _ := os.Getwd()
+	path := filepath.Join(currentDir, "input.txt")
+	dat, _ := os.ReadFile(path)
+	rows := strings.Split(string(dat), "\n")
+
+	// Create a grid of PaperRolls.
+	grid := make([][]PaperRoll, len(rows))
+	for i, row := range rows {
+		grid[i] = make([]PaperRoll, len(row))
+		for j := 0; j < len(row); j++ {
+			grid[i][j] = PaperRoll{
+				accessible: false,
+				value:      row[j],
+			}
+		}
+	}
+
+	numberOfAccessibleRolls := 0
+	for i := 0; i < len(grid); i++ {
+		for j := 0; j < len(grid[i]); j++ {
+			// Check each position in the grid.
+			if grid[i][j].value == 64 && isAccessible(grid, i, j) {
+				grid[i][j].accessible = true
+				numberOfAccessibleRolls++
+			}
+		}
+	}
+
+	//fmt.Println("Updated Grid:", grid)
+	fmt.Println("Number of accessible rolls:", numberOfAccessibleRolls)
+}
+
+func isAccessible(grid [][]PaperRoll, row int, col int) bool {
+	indexesToCheck := [8][2]int{{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}}
+	numberOfAdjacentRolls := 0
+	for _, indexToCheck := range indexesToCheck {
+		if isValidIndex(grid, indexToCheck[0]+row, indexToCheck[1]+col) {
+			//fmt.Println("Position to check", grid[indexToCheck[0]+row][indexToCheck[1]+col].value)
+			if grid[indexToCheck[0]+row][indexToCheck[1]+col].value == 64 {
+				numberOfAdjacentRolls++
+			}
+		}
+	}
+	return numberOfAdjacentRolls < 4
+}
+
+func isValidIndex(grid [][]PaperRoll, row int, col int) bool {
+	if row < 0 || col < 0 || row >= len(grid) || col >= len(grid[0]) {
+		return false
+	}
+	return true
+}
