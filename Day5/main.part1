@@ -1,0 +1,64 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+)
+
+// they can't figure out which of their ingredients are fresh and which are spoiled.
+
+type IngredientIdRange struct {
+	lowerRange int
+	upperRange int
+}
+
+func main() {
+	currentDir, _ := os.Getwd()
+	path := filepath.Join(currentDir, "test-input.txt")
+	dat, _ := os.ReadFile(path)
+	fileRows := strings.Split(string(dat), "\n")
+
+	ingredientIdRanges := []IngredientIdRange{}
+	ingredientIds := []int{}
+
+	isIterationOfIds := false
+	for i := 0; i < len(fileRows); i++ {
+		if fileRows[i] == "" {
+			isIterationOfIds = true
+			continue
+		}
+		if !isIterationOfIds {
+			fileRowsParts := strings.Split(fileRows[i], "-")
+			lowerRange, _ := strconv.Atoi(fileRowsParts[0])
+			upperRange, _ := strconv.Atoi(fileRowsParts[1])
+			ingredientIdRanges = append(ingredientIdRanges, IngredientIdRange{lowerRange: lowerRange, upperRange: upperRange})
+		} else {
+			id, _ := strconv.Atoi(fileRows[i])
+			ingredientIds = append(ingredientIds, id)
+		}
+	}
+
+	totalFreshIngredientIds := 0
+	for i := 0; i < len(ingredientIds); i++ {
+		idToCheck := ingredientIds[i]
+		if isInRange(idToCheck, ingredientIdRanges) {
+			totalFreshIngredientIds++
+		}
+	}
+
+	fmt.Println("ingredientIdRanges", ingredientIdRanges)
+	fmt.Println("ingredientIds", ingredientIds)
+	fmt.Println("totalFreshIngredientIds", totalFreshIngredientIds)
+}
+
+func isInRange(id int, ranges []IngredientIdRange) bool {
+	for i := 0; i < len(ranges); i++ {
+		if id >= ranges[i].lowerRange && id <= ranges[i].upperRange {
+			return true
+		}
+	}
+	return false
+}
